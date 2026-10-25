@@ -10,7 +10,7 @@
 <meta name="theme-color" content="#0B1F3A">
 <title>Contact Prefix Fixer</title>
 <style>
-/* Layout: navy header band, single column of contact rows, sticky gold save bar at the bottom */
+/* Layout: navy header band, two views (country codes / repeated numbers), sticky gold save bar */
 :root{
   --navy:#0B1F3A; --navy-2:#16315A; --gold:#C9A227; --gold-ink:#0B1F3A;
   --bg:#F3F4F7; --card:#FFFFFF; --fg:#0E1726; --muted:#5B6578; --line:#DFE3EA;
@@ -31,9 +31,11 @@
   }
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 var(--sans);padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))}
 .wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.stack{display:flex;flex-direction:column;gap:14px}
 
 header{background:var(--navy);color:#fff;padding-top:env(safe-area-inset-top,0px)}
 header .wrap{padding-block:18px 20px}
@@ -41,9 +43,9 @@ header .wrap{padding-block:18px 20px}
 .mark{width:40px;height:40px;border-radius:10px;background:var(--gold);color:var(--gold-ink);display:grid;place-items:center;font:700 17px var(--mono);flex:none}
 h1{margin:0;font-size:20px;letter-spacing:.2px;text-wrap:balance}
 .sub{margin:2px 0 0;color:#B9C4D8;font-size:13px}
-.privacy{margin:14px 0 0;font-size:12.5px;color:#D9C27A;display:flex;gap:6px;align-items:center}
+.privacy{margin:14px 0 0;font-size:12.5px;color:#D9C27A}
 
-main .wrap{padding-block:16px;display:flex;flex-direction:column;gap:14px}
+main .wrap{padding-block:16px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
 .card h2{margin:0 0 6px;font-size:16px}
 .card p{margin:0;color:var(--muted);font-size:14px}
@@ -51,7 +53,7 @@ ol.steps{margin:10px 0 0;padding-left:20px;color:var(--muted);font-size:14px;dis
 ol.steps b{color:var(--fg);font-weight:600}
 
 .btn{appearance:none;border:0;border-radius:12px;padding:13px 16px;font:600 15px var(--sans);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;text-align:center}
-.btn:focus-visible,.chip:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn:focus-visible,.chip:focus-visible,.seg button:focus-visible,.mode:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .btn-primary{background:var(--navy);color:#fff}
 .btn-gold{background:var(--gold);color:var(--gold-ink)}
 .btn-ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
@@ -62,11 +64,17 @@ ol.steps b{color:var(--fg);font-weight:600}
 input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 
 .banner{background:var(--fix-bg);color:var(--fix);border-radius:10px;padding:10px 12px;font-size:13.5px}
-.err{background:var(--rev-bg);color:var(--rev);border-radius:10px;padding:10px 12px;font-size:14px}
+.err{background:var(--rev-bg);color:var(--rev);border-radius:10px;padding:10px 12px;font-size:14px;margin-top:12px}
 
 .filemeta{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:13.5px;color:var(--muted)}
 .filemeta b{color:var(--fg)}
 .linkbtn{background:none;border:0;color:var(--fg);text-decoration:underline;font:inherit;cursor:pointer;padding:4px 0}
+
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+.seg button{border:0;background:transparent;color:var(--muted);font:600 14px var(--sans);padding:10px 6px;border-radius:9px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--navy);color:#fff}
+@media (prefers-color-scheme: dark){.seg button[aria-pressed=true]{background:var(--navy-2)}}
+.badge{display:inline-block;min-width:22px;padding:0 6px;border-radius:999px;background:var(--gold);color:var(--gold-ink);font:700 12px/20px var(--mono);margin-left:6px;font-variant-numeric:tabular-nums}
 
 .chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 @media (max-width:420px){.chips{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -82,7 +90,7 @@ input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events
 
 .list{display:flex;flex-direction:column;gap:8px}
 .row{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:6px;border-left-width:4px}
-.row.s-fix{border-left-color:var(--gold)} .row.s-review{border-left-color:var(--rev)} .row.s-ok{border-left-color:var(--ok)} .row.s-skip{border-left-color:var(--skip)}
+.row.s-fix{border-left-color:var(--gold)} .row.s-review{border-left-color:var(--rev)} .row.s-ok{border-left-color:var(--ok)} .row.s-skip{border-left-color:var(--skip)} .row.s-dup{border-left-color:var(--gold)}
 .row-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;min-width:0}
 .name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .tag{font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);flex:none}
@@ -95,10 +103,26 @@ input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events
 .row-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12.5px}
 .reason{padding:2px 8px;border-radius:999px;background:var(--skip-bg);color:var(--skip)}
 .s-fix .reason{background:var(--fix-bg);color:var(--fix)} .s-review .reason{background:var(--rev-bg);color:var(--rev)} .s-ok .reason{background:var(--ok-bg);color:var(--ok)}
-.tog{display:flex;align-items:center;gap:6px;color:var(--muted);cursor:pointer}
+.tog{display:flex;align-items:center;gap:6px;color:var(--muted);cursor:pointer;flex:none}
 .tog input{width:20px;height:20px;accent-color:var(--navy)}
 .empty{color:var(--muted);text-align:center;padding:24px 8px;font-size:14px}
 .more{text-align:center}
+
+.note{margin:0;color:var(--muted);font-size:13.5px}
+.note b{color:var(--fg)}
+.modes{display:flex;gap:8px;flex-wrap:wrap}
+.mode{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:8px 14px;font:600 13.5px var(--sans);cursor:pointer}
+.mode[aria-pressed=true]{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold) inset}
+.dgroup{display:grid;gap:6px}
+.dgroup+.dgroup{border-top:1px dashed var(--line);padding-top:8px}
+.dnum{font:600 14px var(--mono);font-variant-numeric:tabular-nums}
+.ents{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+.ent{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:9px;background:var(--bg)}
+.ent .ei{min-width:0}
+.ent .el{font-weight:600;font-size:14px;display:block}
+.ent .ek{color:var(--muted);font-size:12px;font-family:var(--mono);word-break:break-all}
+.ent.rm .el{text-decoration:line-through;color:var(--muted)}
+.pill{font-size:11px;letter-spacing:.4px;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:var(--ok-bg);color:var(--ok);flex:none}
 
 details.help{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
 details.help summary{font-weight:600;cursor:pointer}
@@ -119,7 +143,7 @@ details.help b{color:var(--fg)}
       <div class="mark" aria-hidden="true">+</div>
       <div>
         <h1>Contact Prefix Fixer</h1>
-        <p class="sub">Finds numbers without +966, +20 or another country code</p>
+        <p class="sub">Adds missing country codes and removes repeated numbers</p>
       </div>
     </div>
     <p class="privacy">🔒 Runs only on this phone. Your contacts are never uploaded.</p>
@@ -127,7 +151,7 @@ details.help b{color:var(--fg)}
 </header>
 
 <main>
-  <div class="wrap">
+  <div class="wrap stack">
     <section class="card" id="start">
       <h2>1. Open your contacts file</h2>
       <p>Export it first from the Contacts app:</p>
@@ -141,26 +165,45 @@ details.help b{color:var(--fg)}
         <button class="btn btn-ghost" id="sampleBtn" type="button">Try with sample contacts</button>
       </div>
       <input type="file" id="file" accept=".vcf,text/vcard,text/x-vcard">
-      <div id="error" class="err" style="margin-top:12px" hidden></div>
+      <div id="error" class="err" hidden></div>
     </section>
 
-    <section id="results" hidden style="display:flex;flex-direction:column;gap:14px">
+    <section id="results" class="stack" hidden>
       <div id="sampleNote" class="banner" hidden>These are sample contacts. Open your own file to fix your real contacts.</div>
       <div class="filemeta">
         <span id="meta"></span>
         <button class="linkbtn" id="changeFile" type="button">Open another file</button>
       </div>
-      <div class="chips" role="group" aria-label="Filter">
-        <button class="chip c-fix" data-f="fix" type="button"><span class="n" id="cFix">0</span><span class="l">Will fix</span></button>
-        <button class="chip c-rev" data-f="review" type="button"><span class="n" id="cRev">0</span><span class="l">Check these</span></button>
-        <button class="chip c-ok" data-f="ok" type="button"><span class="n" id="cOk">0</span><span class="l">Already OK</span></button>
-        <button class="chip c-skip" data-f="skip" type="button"><span class="n" id="cSkip">0</span><span class="l">Skipped</span></button>
+
+      <div class="seg" role="group" aria-label="View">
+        <button type="button" data-v="prefix" id="vPrefix">Country codes<span class="badge" id="bPrefix">0</span></button>
+        <button type="button" data-v="dup" id="vDup">Repeated numbers<span class="badge" id="bDup">0</span></button>
       </div>
+
       <div class="toolbar">
         <input class="search" id="q" type="search" placeholder="Search name or number" autocomplete="off">
         <button class="linkbtn" id="toggleAll" type="button">Untick all</button>
       </div>
-      <div class="list" id="list"></div>
+
+      <div id="prefixView" class="stack">
+        <div class="chips" role="group" aria-label="Filter">
+          <button class="chip c-fix" data-f="fix" type="button"><span class="n" id="cFix">0</span><span class="l">Will fix</span></button>
+          <button class="chip c-rev" data-f="review" type="button"><span class="n" id="cRev">0</span><span class="l">Check these</span></button>
+          <button class="chip c-ok" data-f="ok" type="button"><span class="n" id="cOk">0</span><span class="l">Already OK</span></button>
+          <button class="chip c-skip" data-f="skip" type="button"><span class="n" id="cSkip">0</span><span class="l">Skipped</span></button>
+        </div>
+        <div class="list" id="list"></div>
+      </div>
+
+      <div id="dupView" class="stack" hidden>
+        <p class="note" id="dupSummary"></p>
+        <div class="modes" role="group" aria-label="What to remove">
+          <button class="mode" type="button" data-mode="label">Remove repeats of the same app</button>
+          <button class="mode" type="button" data-mode="all">Keep one entry per number</button>
+        </div>
+        <div class="list" id="dupList"></div>
+      </div>
+
       <div class="more" id="more" hidden><button class="btn btn-ghost" id="moreBtn" type="button">Show more</button></div>
 
       <details class="help" id="help">
@@ -169,6 +212,7 @@ details.help b{color:var(--fg)}
           <li><b>Keep your original export.</b> It is your backup.</li>
           <li><b>Best way (no duplicates):</b> on a computer open iCloud.com → Contacts → select all → Delete. Then use <b>Import Contact</b> and pick the <b>all contacts</b> file you saved here.</li>
           <li><b>iPhone only:</b> save <b>changed contacts</b>, delete those contacts in the Contacts app (use “Copy names” for the list), then open the saved file in Files and tap <b>Add All Contacts</b>.</li>
+          <li>Apps like Botim or WhatsApp can add their rows again the next time they sync. To stop that, turn off their Contacts access in Settings → Apps.</li>
         </ol>
         <div class="actions"><button class="btn btn-ghost" id="copyNames" type="button">Copy names of changed contacts</button></div>
       </details>
@@ -188,11 +232,13 @@ details.help b{color:var(--fg)}
 (function(){
 "use strict";
 var $=function(s){return document.querySelector(s)};
-var cards=[],nums=[],filter="fix",query="",shown=150,fileName="",isSample=false;
+var cards=[],nums=[],ents=[],dups=[];
+var view="prefix",filter="fix",dupMode="label",query="",shown=150,fileName="",isSample=false;
 
 var SAMPLE=[
-"BEGIN:VCARD","VERSION:3.0","N:Sample;Khalid;;;","FN:Khalid (sample)","TEL;type=CELL;type=VOICE;type=pref:050 123 4567","END:VCARD",
-"BEGIN:VCARD","VERSION:3.0","N:Sample;Mona;;;","FN:Mona (sample)","TEL;type=CELL;type=VOICE;type=pref:01012345678","END:VCARD",
+"BEGIN:VCARD","VERSION:3.0","N:Sample;Khalid;;;","FN:Khalid (sample)","TEL;type=CELL;type=VOICE;type=pref:050 123 4567","item1.TEL:+966501234567","item1.X-ABLabel:WhatsApp","END:VCARD",
+"BEGIN:VCARD","VERSION:3.0","N:Sample;Walid;;;","FN:Walid (sample)","TEL;type=VOICE:+966 50 844 0000","item1.TEL:+966 50 844 0000","item1.X-ABLabel:Botim","item2.TEL:+966 50 844 0000","item2.X-ABLabel:botim","item3.IMPP;X-SERVICE-TYPE=botim:x-apple:%2B966508440000","item3.X-ABLabel:botim","END:VCARD",
+"BEGIN:VCARD","VERSION:3.0","N:Sample;Mona;;;","FN:Mona (sample)","TEL;type=CELL;type=VOICE;type=pref:01012345678","TEL;type=CELL;type=VOICE:+20 101 234 5678","END:VCARD",
 "BEGIN:VCARD","VERSION:3.0","N:;;;;","FN:Riyadh Office (sample)","ORG:Riyadh Office;","TEL;type=WORK;type=VOICE:011 456 7890","END:VCARD",
 "BEGIN:VCARD","VERSION:3.0","N:Sample;Faisal;;;","FN:Faisal (sample)","TEL;type=CELL;type=VOICE:+966 55 123 4567","END:VCARD",
 "BEGIN:VCARD","VERSION:3.0","N:Sample;Sara;;;","FN:Sara (sample)","TEL;type=CELL;type=VOICE:+966 0501112222","END:VCARD",
@@ -222,6 +268,7 @@ function parse(text){
   return out;
 }
 
+/* ---------- country-code rules ---------- */
 function analyze(rawVal){
   var raw=toLatin(rawVal.trim());
   var cut=raw.search(/[,;#]/);
@@ -259,6 +306,10 @@ function analyze(rawVal){
 }
 
 function abLabel(v){var m=v.match(/_\$!<(.+)>!\$_/);return m?m[1]:unesc(v)}
+function paramVal(params,name){
+  var m=params.match(new RegExp("(?:^|;)"+name+"=([^;]+)","i"));
+  return m?m[1].split(",")[0].replace(/"/g,"").trim():"";
+}
 function typeLabel(params){
   var vals=[],re=/TYPE=([^;:]+)/gi,m;
   while((m=re.exec(params)))vals=vals.concat(m[1].toLowerCase().split(","));
@@ -266,40 +317,6 @@ function typeLabel(params){
   vals=vals.filter(function(v){return v&&["voice","pref","internet"].indexOf(v)<0});
   var map={cell:"mobile",iphone:"iPhone",home:"home",work:"work",main:"main",fax:"fax"};
   return vals.length?(map[vals[0]]||vals[0]):"phone";
-}
-
-function load(text,name,sample){
-  var parsed=parse(text);
-  if(!parsed.length){showError("No contacts found in this file. Pick the .vcf file you exported from the Contacts app.");return}
-  cards=parsed;nums=[];fileName=name;isSample=!!sample;
-  cards.forEach(function(c,ci){
-    var fn="",n="",org="",labels={};
-    c.lines.forEach(function(l){
-      var m=l.match(/^([A-Za-z0-9-]+)\.X-ABLABEL[^:]*:(.*)$/i);
-      if(m)labels[m[1].toLowerCase()]=abLabel(m[2]);
-      else if(/^FN[;:]/i.test(l))fn=unesc(l.slice(l.indexOf(":")+1));
-      else if(/^N[;:]/i.test(l)){var p=l.slice(l.indexOf(":")+1).split(";").map(unesc);n=[p[1],p[2],p[0]].filter(Boolean).join(" ")}
-      else if(/^ORG[;:]/i.test(l))org=unesc(l.slice(l.indexOf(":")+1).split(";")[0]);
-    });
-    c.name=fn||n||org||"(No name)";
-    c.lines.forEach(function(l,li){
-      var m=l.match(/^(?:([A-Za-z0-9-]+)\.)?TEL(?=[;:])/i);if(!m)return;
-      var colon=l.indexOf(":");if(colon<0)return;
-      var val=l.slice(colon+1),pre="";
-      if(/^tel:/i.test(val)){pre=val.slice(0,4);val=val.slice(4)}
-      var label=(m[1]&&labels[m[1].toLowerCase()])||typeLabel(l.slice(0,colon));
-      var a=analyze(val);
-      nums.push({id:nums.length,ci:ci,li:li,colon:colon,pre:pre,raw:val,label:label,status:a.status,reason:a.reason,edit:a.fixed,apply:a.status==="fix"});
-    });
-  });
-  $("#error").hidden=true;
-  $("#start").hidden=true;$("#results").hidden=false;$("#bar").hidden=false;
-  $("#results").style.display="flex";
-  $("#sampleNote").hidden=!isSample;
-  var counts=count();
-  filter=counts.fix?"fix":(counts.review?"review":"ok");
-  shown=150;query="";$("#q").value="";
-  render();
 }
 
 function compact(v){
@@ -310,24 +327,114 @@ function compact(v){
 function valid(v){var c=compact(v).split(/[,;#]/)[0];return /^\+\d{7,15}$/.test(c)}
 function isChange(n){return (n.status==="fix"||n.status==="review")&&n.apply&&valid(n.edit)&&compact(n.edit)!==n.raw.trim()}
 
-function count(){
-  var c={fix:0,review:0,ok:0,skip:0};
-  nums.forEach(function(n){c[n.status]++});return c;
+/* ---------- repeated-number detection (any app: Botim, WhatsApp, imo…) ---------- */
+function phoneEntry(l,labels){
+  var m=l.match(/^(?:([A-Za-z0-9-]+)\.)?([A-Za-z0-9-]+)(?=[;:])/);if(!m)return null;
+  var prop=m[2].toUpperCase();
+  if(!(prop==="TEL"||prop==="IMPP"||prop==="X-SOCIALPROFILE"||(prop.indexOf("X-")===0&&prop.indexOf("X-AB")!==0)))return null;
+  var colon=l.indexOf(":");if(colon<0)return null;
+  var params=l.slice(0,colon),v=l.slice(colon+1);
+  try{v=decodeURIComponent(v)}catch(e){}
+  for(var i=0;i<3&&/^[a-z][a-z0-9+.-]*:/i.test(v);i++)v=v.replace(/^[a-z][a-z0-9+.-]*:(\/\/)?/i,"");
+  v=toLatin(v.replace(/@.*$/,"").replace(/\?.*$/,"").trim());
+  if(!/^\+?[\d\s\-().]{7,22}$/.test(v))return null;
+  var d=v.replace(/\D/g,"");if(d.length<7||d.length>15)return null;
+  var a=analyze(v);
+  var key=a.status==="ok"?"+"+d:(a.fixed?compact(a.fixed):d);
+  var g=m[1]?m[1].toLowerCase():"";
+  var label=(g&&labels[g])||paramVal(params,"X-SERVICE-TYPE")||(prop==="TEL"?typeLabel(params):(paramVal(params,"TYPE")||prop.replace(/^X-/,"").toLowerCase()));
+  return {prop:prop,group:g,label:label,raw:v,key:key};
+}
+function applyMode(){
+  dups.forEach(function(d){d.groups.forEach(function(g){
+    var keep=g.entries.filter(function(e){return e.prop==="TEL"})[0]||g.entries[0];
+    var seen={};seen[keep.label.toLowerCase()]=1;
+    g.entries.forEach(function(e){
+      e.keeper=e===keep;
+      if(e.keeper){e.remove=false;return}
+      var lk=e.label.toLowerCase();
+      e.remove=dupMode==="all"?true:!!seen[lk];
+      seen[lk]=1;
+    });
+  })});
+}
+
+function load(text,name,sample){
+  var parsed=parse(text);
+  if(!parsed.length){showError("No contacts found in this file. Pick the .vcf file you exported from the Contacts app.");return}
+  cards=parsed;nums=[];ents=[];dups=[];fileName=name;isSample=!!sample;
+  cards.forEach(function(c,ci){
+    var fn="",n="",org="",labels={};
+    c.lines.forEach(function(l){
+      var m=l.match(/^([A-Za-z0-9-]+)\.X-ABLABEL[^:]*:(.*)$/i);
+      if(m)labels[m[1].toLowerCase()]=abLabel(m[2]);
+      else if(/^FN[;:]/i.test(l))fn=unesc(l.slice(l.indexOf(":")+1));
+      else if(/^N[;:]/i.test(l)){var p=l.slice(l.indexOf(":")+1).split(";").map(unesc);n=[p[1],p[2],p[0]].filter(Boolean).join(" ")}
+      else if(/^ORG[;:]/i.test(l))org=unesc(l.slice(l.indexOf(":")+1).split(";")[0]);
+    });
+    c.name=fn||n||org||"(No name)";
+    var groups={},order=[];
+    c.lines.forEach(function(l,li){
+      var m=l.match(/^(?:([A-Za-z0-9-]+)\.)?TEL(?=[;:])/i);
+      if(m){
+        var colon=l.indexOf(":");
+        if(colon>=0){
+          var val=l.slice(colon+1),pre="";
+          if(/^tel:/i.test(val)){pre=val.slice(0,4);val=val.slice(4)}
+          var label=(m[1]&&labels[m[1].toLowerCase()])||typeLabel(l.slice(0,colon));
+          var a=analyze(val);
+          nums.push({id:nums.length,ci:ci,li:li,colon:colon,pre:pre,raw:val,label:label,status:a.status,reason:a.reason,edit:a.fixed,apply:a.status==="fix"});
+        }
+      }
+      var e=phoneEntry(l,labels);
+      if(e){e.ci=ci;e.li=li;if(!groups[e.key]){groups[e.key]=[];order.push(e.key)}groups[e.key].push(e)}
+    });
+    var gs=order.filter(function(k){return groups[k].length>1}).map(function(k){return {key:k,entries:groups[k]}});
+    gs.forEach(function(g){g.entries.forEach(function(e){e.id=ents.length;ents.push(e)})});
+    if(gs.length)dups.push({ci:ci,groups:gs});
+  });
+  applyMode();
+  $("#error").hidden=true;$("#start").hidden=true;$("#results").hidden=false;$("#bar").hidden=false;
+  $("#sampleNote").hidden=!isSample;
+  var c=count();
+  filter=c.fix?"fix":(c.review?"review":"ok");
+  view="prefix";shown=150;query="";$("#q").value="";
+  render();
+}
+
+function count(){var c={fix:0,review:0,ok:0,skip:0};nums.forEach(function(n){c[n.status]++});return c}
+function matchQ(name,digits){
+  if(!query)return true;
+  var q=query.toLowerCase(),qd=toLatin(query).replace(/\D/g,"");
+  return name.toLowerCase().indexOf(q)>=0||(!!qd&&digits.some(function(d){return d.indexOf(qd)>=0}));
 }
 function visible(){
-  var q=query.toLowerCase(),qd=toLatin(query).replace(/\D/g,"");
   return nums.filter(function(n){
     if(filter!=="all"&&n.status!==filter)return false;
-    if(!q)return true;
-    return cards[n.ci].name.toLowerCase().indexOf(q)>=0||(qd&&toLatin(n.raw).replace(/\D/g,"").indexOf(qd)>=0);
+    return matchQ(cards[n.ci].name,[toLatin(n.raw).replace(/\D/g,"")]);
   });
+}
+function visibleDups(){
+  return dups.filter(function(d){return matchQ(cards[d.ci].name,d.groups.map(function(g){return g.key.replace(/\D/g,"")}))});
 }
 
 function render(){
   var c=count();
+  $("#meta").innerHTML="<b>"+cards.length+"</b> contacts · <b>"+nums.length+"</b> numbers"+(fileName?" · "+esc(fileName):"");
+  $("#bPrefix").textContent=c.fix+c.review;
+  $("#bDup").textContent=dups.length;
+  $("#vPrefix").setAttribute("aria-pressed",view==="prefix"?"true":"false");
+  $("#vDup").setAttribute("aria-pressed",view==="dup"?"true":"false");
+  $("#prefixView").hidden=view!=="prefix";
+  $("#dupView").hidden=view!=="dup";
+  if(view==="prefix")renderPrefix();else renderDup();
+  updateBar();
+}
+
+function renderPrefix(){
+  var c=count();
   $("#cFix").textContent=c.fix;$("#cRev").textContent=c.review;$("#cOk").textContent=c.ok;$("#cSkip").textContent=c.skip;
   document.querySelectorAll(".chip").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.f===filter?"true":"false")});
-  $("#meta").innerHTML="<b>"+cards.length+"</b> contacts · <b>"+nums.length+"</b> numbers"+(fileName?" · "+esc(fileName):"");
   var v=visible(),html="";
   v.slice(0,shown).forEach(function(n){
     var editable=n.status==="fix"||n.status==="review";
@@ -340,33 +447,67 @@ function render(){
       (editable?'<label class="tog"><input type="checkbox" id="a'+n.id+'" data-id="'+n.id+'"'+(n.apply?" checked":"")+'> Apply</label>':"")+
       '</div></div>';
   });
-  if(!v.length)html='<div class="empty">'+(query?"No match for this search.":({fix:"Nothing to fix here.",review:"Nothing needs checking.",ok:"No numbers with a country code yet.",skip:"Nothing skipped."}[filter]))+'</div>';
+  if(!v.length)html='<div class="empty">'+(query?"No match for this search.":({fix:"Nothing to fix here.",review:"Nothing needs checking.",ok:"No numbers with a country code yet.",skip:"Nothing skipped.",all:"No numbers."}[filter]))+'</div>';
   $("#list").innerHTML=html;
   $("#more").hidden=v.length<=shown;
-  $("#toggleAll").hidden=!(filter==="fix"||filter==="review")||!v.length;
-  syncToggleLabel();
-  updateBar();
+  var ed=v.filter(function(n){return n.status==="fix"||n.status==="review"});
+  $("#toggleAll").hidden=!ed.length;
+  $("#toggleAll").textContent=ed.length&&ed.every(function(n){return n.apply})?"Untick all":"Tick all";
 }
-function syncToggleLabel(){
-  var v=visible().filter(function(n){return n.status==="fix"||n.status==="review"});
-  var allOn=v.length&&v.every(function(n){return n.apply});
-  $("#toggleAll").textContent=allOn?"Untick all":"Tick all";
+
+function renderDup(){
+  document.querySelectorAll(".mode").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.mode===dupMode?"true":"false")});
+  var rm=ents.filter(function(e){return e.remove}).length;
+  $("#dupSummary").innerHTML=dups.length
+    ?"<b>"+dups.length+"</b> contacts have the same number saved more than once, from any app or label. <b>"+rm+"</b> extra entries are ticked for removal. The green <b>Keep</b> entry always stays."
+    :"No contact has the same number saved more than once.";
+  var v=visibleDups(),html="";
+  v.slice(0,shown).forEach(function(d){
+    var n=0;d.groups.forEach(function(g){g.entries.forEach(function(e){if(e.remove)n++})});
+    html+='<div class="row s-dup"><div class="row-top"><span class="name">'+esc(cards[d.ci].name)+'</span><span class="tag">'+(n?n+" to remove":"nothing ticked")+'</span></div>';
+    d.groups.forEach(function(g){
+      html+='<div class="dgroup"><div class="dnum">'+esc(g.key)+' · saved '+g.entries.length+'×</div><ul class="ents">';
+      g.entries.forEach(function(e){
+        html+='<li class="ent'+(e.remove?" rm":"")+'"><span class="ei"><span class="el">'+esc(e.label)+'</span><span class="ek">'+(e.prop==="TEL"?"phone":"app")+" · "+esc(e.raw)+'</span></span>'+
+          (e.keeper?'<span class="pill">Keep</span>':'<label class="tog"><input type="checkbox" id="e'+e.id+'" data-e="'+e.id+'"'+(e.remove?" checked":"")+'> Remove</label>')+
+          '</li>';
+      });
+      html+='</ul></div>';
+    });
+    html+='</div>';
+  });
+  if(!v.length)html='<div class="empty">'+(query?"No match for this search.":"No repeated numbers found.")+'</div>';
+  $("#dupList").innerHTML=html;
+  $("#more").hidden=v.length<=shown;
+  $("#toggleAll").hidden=true;
 }
-function changedCards(){var s={};nums.forEach(function(n){if(isChange(n))s[n.ci]=1});return Object.keys(s).length}
+
+function changedSet(){
+  var s={};
+  nums.forEach(function(n){if(isChange(n))s[n.ci]=1});
+  ents.forEach(function(e){if(e.remove)s[e.ci]=1});
+  return s;
+}
 function updateBar(){
-  var k=changedCards();
+  var k=Object.keys(changedSet()).length;
   $("#saveChanged").textContent="Save changed ("+k+")";
   $("#saveChanged").disabled=!k;
 }
 
 function buildVcf(onlyChanged){
-  var by={};nums.forEach(function(n){if(isChange(n))(by[n.ci]=by[n.ci]||[]).push(n)});
+  var by={},rm={};
+  nums.forEach(function(n){if(isChange(n))(by[n.ci]=by[n.ci]||[]).push(n)});
+  ents.forEach(function(e){if(e.remove)(rm[e.ci]=rm[e.ci]||[]).push(e)});
   var out=[];
   cards.forEach(function(c,ci){
-    var ch=by[ci];if(onlyChanged&&!ch)return;
-    var lines=c.lines.slice();
-    (ch||[]).forEach(function(n){lines[n.li]=lines[n.li].slice(0,n.colon+1)+n.pre+compact(n.edit)});
-    out.push(lines.join("\r\n"));
+    var ch=by[ci],r=rm[ci];if(onlyChanged&&!ch&&!r)return;
+    var lines=c.lines.slice(),drop={};
+    (r||[]).forEach(function(e){
+      drop[e.li]=1;
+      if(e.group)lines.forEach(function(l,i){if(l.toLowerCase().indexOf(e.group+".")===0)drop[i]=1});
+    });
+    (ch||[]).forEach(function(n){if(!drop[n.li])lines[n.li]=lines[n.li].slice(0,n.colon+1)+n.pre+compact(n.edit)});
+    out.push(lines.filter(function(l,i){return !drop[i]}).join("\r\n"));
   });
   return out.join("\r\n")+"\r\n";
 }
@@ -389,7 +530,7 @@ function download(blob,name){
 }
 
 var tt;function toast(m){var t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(function(){t.hidden=true},2600)}
-function showError(m){var e=$("#error");e.textContent=m;e.hidden=false;$("#start").hidden=false;$("#results").hidden=true;$("#results").style.display="none";$("#bar").hidden=true}
+function showError(m){var e=$("#error");e.textContent=m;e.hidden=false;$("#start").hidden=false;$("#results").hidden=true;$("#bar").hidden=true}
 
 $("#file").addEventListener("change",function(e){
   var f=e.target.files[0];if(!f)return;
@@ -401,7 +542,9 @@ $("#file").addEventListener("change",function(e){
 });
 $("#sampleBtn").addEventListener("click",function(){load(SAMPLE,"",true)});
 $("#changeFile").addEventListener("click",function(){$("#file").click()});
+document.querySelectorAll(".seg button").forEach(function(b){b.addEventListener("click",function(){view=b.dataset.v;shown=150;render()})});
 document.querySelectorAll(".chip").forEach(function(b){b.addEventListener("click",function(){filter=filter===b.dataset.f?"all":b.dataset.f;shown=150;render()})});
+document.querySelectorAll(".mode").forEach(function(b){b.addEventListener("click",function(){dupMode=b.dataset.mode;applyMode();render()})});
 $("#q").addEventListener("input",function(e){query=e.target.value.trim();shown=150;render()});
 $("#moreBtn").addEventListener("click",function(){shown+=150;render()});
 $("#toggleAll").addEventListener("click",function(){
@@ -418,12 +561,16 @@ $("#list").addEventListener("input",function(e){
 });
 $("#list").addEventListener("change",function(e){
   var t=e.target;if(t.type!=="checkbox")return;
-  nums[+t.dataset.id].apply=t.checked;syncToggleLabel();updateBar();
+  nums[+t.dataset.id].apply=t.checked;updateBar();
+});
+$("#dupList").addEventListener("change",function(e){
+  var t=e.target;if(t.type!=="checkbox")return;
+  ents[+t.dataset.e].remove=t.checked;render();
 });
 $("#saveChanged").addEventListener("click",function(){saveFile(buildVcf(true),"contacts-changed-"+stamp()+".vcf")});
 $("#saveAll").addEventListener("click",function(){saveFile(buildVcf(false),"contacts-all-fixed-"+stamp()+".vcf")});
 $("#copyNames").addEventListener("click",function(){
-  var s={},names=[];nums.forEach(function(n){if(isChange(n)&&!s[n.ci]){s[n.ci]=1;names.push(cards[n.ci].name)}});
+  var names=Object.keys(changedSet()).map(function(ci){return cards[ci].name});
   if(!names.length){toast("No changed contacts yet");return}
   var txt=names.join("\n");
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){toast("Copied "+names.length+" names")},function(){toast("Copy failed")})}
