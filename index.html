@@ -1,1 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Prefix Fixer">
+<meta name="theme-color" content="#0B1F3A">
+<title>Contact Prefix Fixer</title>
+<style>
+/* Layout: navy header band, single column of contact rows, sticky gold save bar at the bottom */
+:root{
+  --navy:#0B1F3A; --navy-2:#16315A; --gold:#C9A227; --gold-ink:#0B1F3A;
+  --bg:#F3F4F7; --card:#FFFFFF; --fg:#0E1726; --muted:#5B6578; --line:#DFE3EA;
+  --ok:#1D7F46; --ok-bg:#E2F3E9;
+  --fix:#7A5C00; --fix-bg:#FAF0CF;
+  --rev:#B4410F; --rev-bg:#FDE9DC;
+  --skip:#5F6776; --skip-bg:#ECEEF2;
+  --bad:#C0392B;
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Noto Sans Arabic",sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#07101D; --card:#0F1B2E; --fg:#E7EBF2; --muted:#98A3B7; --line:#1E2D45;
+    --ok:#5BD08A; --ok-bg:#0E2A1B; --fix:#E9C75A; --fix-bg:#2A230C;
+    --rev:#FF9A66; --rev-bg:#33190C; --skip:#A3AAB8; --skip-bg:#18233A; --bad:#FF7B6E;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 var(--sans);padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 
+header{background:var(--navy);color:#fff;padding-top:env(safe-area-inset-top,0px)}
+header .wrap{padding-block:18px 20px}
+.brand{display:flex;align-items:center;gap:12px}
+.mark{width:40px;height:40px;border-radius:10px;background:var(--gold);color:var(--gold-ink);display:grid;place-items:center;font:700 17px var(--mono);flex:none}
+h1{margin:0;font-size:20px;letter-spacing:.2px;text-wrap:balance}
+.sub{margin:2px 0 0;color:#B9C4D8;font-size:13px}
+.privacy{margin:14px 0 0;font-size:12.5px;color:#D9C27A;display:flex;gap:6px;align-items:center}
+
+main .wrap{padding-block:16px;display:flex;flex-direction:column;gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card h2{margin:0 0 6px;font-size:16px}
+.card p{margin:0;color:var(--muted);font-size:14px}
+ol.steps{margin:10px 0 0;padding-left:20px;color:var(--muted);font-size:14px;display:grid;gap:4px}
+ol.steps b{color:var(--fg);font-weight:600}
+
+.btn{appearance:none;border:0;border-radius:12px;padding:13px 16px;font:600 15px var(--sans);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;text-align:center}
+.btn:focus-visible,.chip:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn-primary{background:var(--navy);color:#fff}
+.btn-gold{background:var(--gold);color:var(--gold-ink)}
+.btn-ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn[disabled]{opacity:.45;cursor:default}
+@media (prefers-color-scheme: dark){.btn-primary{background:var(--navy-2)}}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.actions .btn{flex:1 1 200px}
+input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+
+.banner{background:var(--fix-bg);color:var(--fix);border-radius:10px;padding:10px 12px;font-size:13.5px}
+.err{background:var(--rev-bg);color:var(--rev);border-radius:10px;padding:10px 12px;font-size:14px}
+
+.filemeta{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:13.5px;color:var(--muted)}
+.filemeta b{color:var(--fg)}
+.linkbtn{background:none;border:0;color:var(--fg);text-decoration:underline;font:inherit;cursor:pointer;padding:4px 0}
+
+.chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:420px){.chips{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:12px;padding:10px;text-align:left;cursor:pointer;font:inherit}
+.chip .n{display:block;font:700 22px/1.1 var(--mono);font-variant-numeric:tabular-nums}
+.chip .l{font-size:12px;letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}
+.chip[aria-pressed=true]{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold) inset}
+.chip.c-fix .n{color:var(--fix)} .chip.c-rev .n{color:var(--rev)} .chip.c-ok .n{color:var(--ok)} .chip.c-skip .n{color:var(--skip)}
+
+.search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--fg);font:16px var(--sans)}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.toolbar .search{flex:1 1 220px}
+
+.list{display:flex;flex-direction:column;gap:8px}
+.row{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:6px;border-left-width:4px}
+.row.s-fix{border-left-color:var(--gold)} .row.s-review{border-left-color:var(--rev)} .row.s-ok{border-left-color:var(--ok)} .row.s-skip{border-left-color:var(--skip)}
+.row-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;min-width:0}
+.name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.tag{font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);flex:none}
+.row-num{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.old{font-size:14.5px;word-break:break-all}
+.s-fix .old,.s-review .old.has{color:var(--muted);text-decoration:line-through}
+.arrow{color:var(--muted)}
+.new{font:600 15px var(--mono);padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--fg);flex:1 1 180px;min-width:0}
+.new.invalid{border-color:var(--bad)}
+.row-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12.5px}
+.reason{padding:2px 8px;border-radius:999px;background:var(--skip-bg);color:var(--skip)}
+.s-fix .reason{background:var(--fix-bg);color:var(--fix)} .s-review .reason{background:var(--rev-bg);color:var(--rev)} .s-ok .reason{background:var(--ok-bg);color:var(--ok)}
+.tog{display:flex;align-items:center;gap:6px;color:var(--muted);cursor:pointer}
+.tog input{width:20px;height:20px;accent-color:var(--navy)}
+.empty{color:var(--muted);text-align:center;padding:24px 8px;font-size:14px}
+.more{text-align:center}
+
+details.help{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+details.help summary{font-weight:600;cursor:pointer}
+details.help ol{margin:10px 0 0;padding-left:20px;color:var(--muted);font-size:14px;display:grid;gap:6px}
+details.help b{color:var(--fg)}
+
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding-top:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:5}
+.bar .wrap{display:flex;gap:10px}
+.bar .btn{flex:1}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));background:var(--navy);color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;z-index:6;max-width:calc(100% - 32px);text-align:center}
+@media (prefers-reduced-motion:no-preference){.toast{animation:pop .2s ease-out}@keyframes pop{from{opacity:0;transform:translate(-50%,8px)}}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand">
+      <div class="mark" aria-hidden="true">+</div>
+      <div>
+        <h1>Contact Prefix Fixer</h1>
+        <p class="sub">Finds numbers without +966, +20 or another country code</p>
+      </div>
+    </div>
+    <p class="privacy">🔒 Runs only on this phone. Your contacts are never uploaded.</p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <section class="card" id="start">
+      <h2>1. Open your contacts file</h2>
+      <p>Export it first from the Contacts app:</p>
+      <ol class="steps">
+        <li>Contacts → tap <b>&lt; Lists</b> (top left)</li>
+        <li>Long-press <b>All Contacts</b> → <b>Export</b></li>
+        <li><b>Save to Files</b>, then come back here</li>
+      </ol>
+      <div class="actions">
+        <label class="btn btn-primary" for="file">Open contacts file (.vcf)</label>
+        <button class="btn btn-ghost" id="sampleBtn" type="button">Try with sample contacts</button>
+      </div>
+      <input type="file" id="file" accept=".vcf,text/vcard,text/x-vcard">
+      <div id="error" class="err" style="margin-top:12px" hidden></div>
+    </section>
+
+    <section id="results" hidden style="display:flex;flex-direction:column;gap:14px">
+      <div id="sampleNote" class="banner" hidden>These are sample contacts. Open your own file to fix your real contacts.</div>
+      <div class="filemeta">
+        <span id="meta"></span>
+        <button class="linkbtn" id="changeFile" type="button">Open another file</button>
+      </div>
+      <div class="chips" role="group" aria-label="Filter">
+        <button class="chip c-fix" data-f="fix" type="button"><span class="n" id="cFix">0</span><span class="l">Will fix</span></button>
+        <button class="chip c-rev" data-f="review" type="button"><span class="n" id="cRev">0</span><span class="l">Check these</span></button>
+        <button class="chip c-ok" data-f="ok" type="button"><span class="n" id="cOk">0</span><span class="l">Already OK</span></button>
+        <button class="chip c-skip" data-f="skip" type="button"><span class="n" id="cSkip">0</span><span class="l">Skipped</span></button>
+      </div>
+      <div class="toolbar">
+        <input class="search" id="q" type="search" placeholder="Search name or number" autocomplete="off">
+        <button class="linkbtn" id="toggleAll" type="button">Untick all</button>
+      </div>
+      <div class="list" id="list"></div>
+      <div class="more" id="more" hidden><button class="btn btn-ghost" id="moreBtn" type="button">Show more</button></div>
+
+      <details class="help" id="help">
+        <summary>2. After saving: put the fixed contacts back</summary>
+        <ol>
+          <li><b>Keep your original export.</b> It is your backup.</li>
+          <li><b>Best way (no duplicates):</b> on a computer open iCloud.com → Contacts → select all → Delete. Then use <b>Import Contact</b> and pick the <b>all contacts</b> file you saved here.</li>
+          <li><b>iPhone only:</b> save <b>changed contacts</b>, delete those contacts in the Contacts app (use “Copy names” for the list), then open the saved file in Files and tap <b>Add All Contacts</b>.</li>
+        </ol>
+        <div class="actions"><button class="btn btn-ghost" id="copyNames" type="button">Copy names of changed contacts</button></div>
+      </details>
+    </section>
+  </div>
+</main>
+
+<div class="bar" id="bar" hidden>
+  <div class="wrap">
+    <button class="btn btn-gold" id="saveChanged" type="button">Save changed (0)</button>
+    <button class="btn btn-primary" id="saveAll" type="button">Save all</button>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+"use strict";
+var $=function(s){return document.querySelector(s)};
+var cards=[],nums=[],filter="fix",query="",shown=150,fileName="",isSample=false;
+
+var SAMPLE=[
+"BEGIN:VCARD","VERSION:3.0","N:Sample;Khalid;;;","FN:Khalid (sample)","TEL;type=CELL;type=VOICE;type=pref:050 123 4567","END:VCARD",
+"BEGIN:VCARD","VERSION:3.0","N:Sample;Mona;;;","FN:Mona (sample)","TEL;type=CELL;type=VOICE;type=pref:01012345678","END:VCARD",
+"BEGIN:VCARD","VERSION:3.0","N:;;;;","FN:Riyadh Office (sample)","ORG:Riyadh Office;","TEL;type=WORK;type=VOICE:011 456 7890","END:VCARD",
+"BEGIN:VCARD","VERSION:3.0","N:Sample;Faisal;;;","FN:Faisal (sample)","TEL;type=CELL;type=VOICE:+966 55 123 4567","END:VCARD",
+"BEGIN:VCARD","VERSION:3.0","N:Sample;Sara;;;","FN:Sara (sample)","TEL;type=CELL;type=VOICE:+966 0501112222","END:VCARD",
+"BEGIN:VCARD","VERSION:3.0","N:Sample;Omar;;;","FN:Omar Dubai (sample)","item1.TEL:00971 50 123 4567","item1.X-ABLabel:_$!<Mobile>!$_","END:VCARD",
+"BEGIN:VCARD","VERSION:3.0","N:Sample;Hassan;;;","FN:Hassan (sample)","TEL;type=CELL;type=VOICE:٠٥٤٧٦٥٤٣٢١","END:VCARD",
+"BEGIN:VCARD","VERSION:3.0","N:Sample;John;;;","FN:John (sample)","TEL;type=CELL;type=VOICE:415 555 0123","END:VCARD",
+"BEGIN:VCARD","VERSION:3.0","N:;;;;","FN:Bank hotline (sample)","ORG:Bank;","TEL;type=WORK;type=VOICE:920001234","END:VCARD"
+].join("\r\n");
+
+function toLatin(s){
+  return s.replace(/[٠-٩]/g,function(c){return String(c.charCodeAt(0)-0x660)})
+          .replace(/[۰-۹]/g,function(c){return String(c.charCodeAt(0)-0x6F0)});
+}
+function unesc(v){return v.replace(/\\n/gi," ").replace(/\\([,;:\\])/g,"$1").trim()}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+
+function parse(text){
+  var lines=text.replace(/^﻿/,"").replace(/\r\n?/g,"\n").replace(/\n[ \t]/g,"").split("\n");
+  var out=[],cur=null;
+  for(var i=0;i<lines.length;i++){
+    var l=lines[i];
+    if(/^BEGIN:VCARD/i.test(l)){cur={lines:[l]};continue}
+    if(!cur)continue;
+    cur.lines.push(l);
+    if(/^END:VCARD/i.test(l)){out.push(cur);cur=null}
+  }
+  return out;
+}
+
+function analyze(rawVal){
+  var raw=toLatin(rawVal.trim());
+  var cut=raw.search(/[,;#]/);
+  var main=cut>=0?raw.slice(0,cut):raw, ext=cut>=0?raw.slice(cut):"";
+  var plus=/^\s*\+/.test(main), d=main.replace(/\D/g,"");
+  function R(status,fixed,reason){return {status:status,fixed:fixed?fixed+ext:"",reason:reason}}
+  if(!d) return R("review","","No digits found");
+  if(plus){
+    if(/^9660\d{9}$/.test(d)) return R("fix","+966"+d.slice(4),"Extra 0 after +966");
+    if(/^2001\d{9}$/.test(d)) return R("fix","+20"+d.slice(3),"Extra 0 after +20");
+    return R("ok","","Has country code");
+  }
+  if(d.indexOf("00")===0){
+    d=d.slice(2);
+    if(/^9660\d{9}$/.test(d)) return R("fix","+966"+d.slice(4),"00 → +, extra 0 removed");
+    if(/^2001\d{9}$/.test(d)) return R("fix","+20"+d.slice(3),"00 → +, extra 0 removed");
+    if(d.length>=7) return R("fix","+"+d,"00 replaced with +");
+    return R("review","","Too short after 00");
+  }
+  if(/^(800\d{7}|920\d{6}|700\d{7})$/.test(d)) return R("skip","","Saudi toll-free / unified number");
+  if(d.length<7) return R("skip","","Short service number");
+  if(/^05\d{8}$/.test(d)) return R("fix","+966"+d.slice(1),"Saudi mobile");
+  if(/^5\d{8}$/.test(d)) return R("fix","+966"+d,"Saudi mobile");
+  if(/^9665\d{8}$/.test(d)) return R("fix","+"+d,"Saudi mobile, + missing");
+  if(/^96605\d{8}$/.test(d)) return R("fix","+966"+d.slice(4),"Saudi mobile, + missing");
+  if(/^01[1-7]\d{7}$/.test(d)) return R("fix","+966"+d.slice(1),"Saudi landline");
+  if(/^9661[1-7]\d{7}$/.test(d)) return R("fix","+"+d,"Saudi landline, + missing");
+  if(/^01[0125]\d{8}$/.test(d)) return R("fix","+20"+d.slice(1),"Egyptian mobile");
+  if(/^1[0125]\d{8}$/.test(d)) return R("fix","+20"+d,"Egyptian mobile");
+  if(/^201[0125]\d{8}$/.test(d)) return R("fix","+"+d,"Egyptian mobile, + missing");
+  if(/^2001[0125]\d{8}$/.test(d)) return R("fix","+20"+d.slice(3),"Egyptian mobile, + missing");
+  if(/^02\d{8}$/.test(d)) return R("fix","+20"+d.slice(1),"Cairo / Giza landline");
+  if(/^03\d{7}$/.test(d)) return R("fix","+20"+d.slice(1),"Alexandria landline");
+  return R("review","","Unknown country, type the full number");
+}
+
+function abLabel(v){var m=v.match(/_\$!<(.+)>!\$_/);return m?m[1]:unesc(v)}
+function typeLabel(params){
+  var vals=[],re=/TYPE=([^;:]+)/gi,m;
+  while((m=re.exec(params)))vals=vals.concat(m[1].toLowerCase().split(","));
+  params.split(";").slice(1).forEach(function(p){if(p.indexOf("=")<0)vals.push(p.toLowerCase())});
+  vals=vals.filter(function(v){return v&&["voice","pref","internet"].indexOf(v)<0});
+  var map={cell:"mobile",iphone:"iPhone",home:"home",work:"work",main:"main",fax:"fax"};
+  return vals.length?(map[vals[0]]||vals[0]):"phone";
+}
+
+function load(text,name,sample){
+  var parsed=parse(text);
+  if(!parsed.length){showError("No contacts found in this file. Pick the .vcf file you exported from the Contacts app.");return}
+  cards=parsed;nums=[];fileName=name;isSample=!!sample;
+  cards.forEach(function(c,ci){
+    var fn="",n="",org="",labels={};
+    c.lines.forEach(function(l){
+      var m=l.match(/^([A-Za-z0-9-]+)\.X-ABLABEL[^:]*:(.*)$/i);
+      if(m)labels[m[1].toLowerCase()]=abLabel(m[2]);
+      else if(/^FN[;:]/i.test(l))fn=unesc(l.slice(l.indexOf(":")+1));
+      else if(/^N[;:]/i.test(l)){var p=l.slice(l.indexOf(":")+1).split(";").map(unesc);n=[p[1],p[2],p[0]].filter(Boolean).join(" ")}
+      else if(/^ORG[;:]/i.test(l))org=unesc(l.slice(l.indexOf(":")+1).split(";")[0]);
+    });
+    c.name=fn||n||org||"(No name)";
+    c.lines.forEach(function(l,li){
+      var m=l.match(/^(?:([A-Za-z0-9-]+)\.)?TEL(?=[;:])/i);if(!m)return;
+      var colon=l.indexOf(":");if(colon<0)return;
+      var val=l.slice(colon+1),pre="";
+      if(/^tel:/i.test(val)){pre=val.slice(0,4);val=val.slice(4)}
+      var label=(m[1]&&labels[m[1].toLowerCase()])||typeLabel(l.slice(0,colon));
+      var a=analyze(val);
+      nums.push({id:nums.length,ci:ci,li:li,colon:colon,pre:pre,raw:val,label:label,status:a.status,reason:a.reason,edit:a.fixed,apply:a.status==="fix"});
+    });
+  });
+  $("#error").hidden=true;
+  $("#start").hidden=true;$("#results").hidden=false;$("#bar").hidden=false;
+  $("#results").style.display="flex";
+  $("#sampleNote").hidden=!isSample;
+  var counts=count();
+  filter=counts.fix?"fix":(counts.review?"review":"ok");
+  shown=150;query="";$("#q").value="";
+  render();
+}
+
+function compact(v){
+  var t=toLatin(v.trim()),cut=t.search(/[,;#]/);
+  var main=cut>=0?t.slice(0,cut):t,ext=cut>=0?t.slice(cut):"";
+  return main.replace(/[\s\-().‎‏]/g,"")+ext;
+}
+function valid(v){var c=compact(v).split(/[,;#]/)[0];return /^\+\d{7,15}$/.test(c)}
+function isChange(n){return (n.status==="fix"||n.status==="review")&&n.apply&&valid(n.edit)&&compact(n.edit)!==n.raw.trim()}
+
+function count(){
+  var c={fix:0,review:0,ok:0,skip:0};
+  nums.forEach(function(n){c[n.status]++});return c;
+}
+function visible(){
+  var q=query.toLowerCase(),qd=toLatin(query).replace(/\D/g,"");
+  return nums.filter(function(n){
+    if(filter!=="all"&&n.status!==filter)return false;
+    if(!q)return true;
+    return cards[n.ci].name.toLowerCase().indexOf(q)>=0||(qd&&toLatin(n.raw).replace(/\D/g,"").indexOf(qd)>=0);
+  });
+}
+
+function render(){
+  var c=count();
+  $("#cFix").textContent=c.fix;$("#cRev").textContent=c.review;$("#cOk").textContent=c.ok;$("#cSkip").textContent=c.skip;
+  document.querySelectorAll(".chip").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.f===filter?"true":"false")});
+  $("#meta").innerHTML="<b>"+cards.length+"</b> contacts · <b>"+nums.length+"</b> numbers"+(fileName?" · "+esc(fileName):"");
+  var v=visible(),html="";
+  v.slice(0,shown).forEach(function(n){
+    var editable=n.status==="fix"||n.status==="review";
+    html+='<div class="row s-'+n.status+'">'+
+      '<div class="row-top"><span class="name">'+esc(cards[n.ci].name)+'</span><span class="tag">'+esc(n.label)+'</span></div>'+
+      '<div class="row-num"><span class="old'+(n.status==="review"&&valid(n.edit)?" has":"")+'">'+esc(n.raw)+'</span>'+
+      (editable?'<span class="arrow" aria-hidden="true">→</span><input class="new'+(n.edit&&!valid(n.edit)?" invalid":"")+'" id="n'+n.id+'" data-id="'+n.id+'" inputmode="tel" autocomplete="off" aria-label="New number for '+esc(cards[n.ci].name)+'" placeholder="+…" value="'+esc(n.edit)+'">':"")+
+      '</div>'+
+      '<div class="row-foot"><span class="reason">'+esc(n.reason)+'</span>'+
+      (editable?'<label class="tog"><input type="checkbox" id="a'+n.id+'" data-id="'+n.id+'"'+(n.apply?" checked":"")+'> Apply</label>':"")+
+      '</div></div>';
+  });
+  if(!v.length)html='<div class="empty">'+(query?"No match for this search.":({fix:"Nothing to fix here.",review:"Nothing needs checking.",ok:"No numbers with a country code yet.",skip:"Nothing skipped."}[filter]))+'</div>';
+  $("#list").innerHTML=html;
+  $("#more").hidden=v.length<=shown;
+  $("#toggleAll").hidden=!(filter==="fix"||filter==="review")||!v.length;
+  syncToggleLabel();
+  updateBar();
+}
+function syncToggleLabel(){
+  var v=visible().filter(function(n){return n.status==="fix"||n.status==="review"});
+  var allOn=v.length&&v.every(function(n){return n.apply});
+  $("#toggleAll").textContent=allOn?"Untick all":"Tick all";
+}
+function changedCards(){var s={};nums.forEach(function(n){if(isChange(n))s[n.ci]=1});return Object.keys(s).length}
+function updateBar(){
+  var k=changedCards();
+  $("#saveChanged").textContent="Save changed ("+k+")";
+  $("#saveChanged").disabled=!k;
+}
+
+function buildVcf(onlyChanged){
+  var by={};nums.forEach(function(n){if(isChange(n))(by[n.ci]=by[n.ci]||[]).push(n)});
+  var out=[];
+  cards.forEach(function(c,ci){
+    var ch=by[ci];if(onlyChanged&&!ch)return;
+    var lines=c.lines.slice();
+    (ch||[]).forEach(function(n){lines[n.li]=lines[n.li].slice(0,n.colon+1)+n.pre+compact(n.edit)});
+    out.push(lines.join("\r\n"));
+  });
+  return out.join("\r\n")+"\r\n";
+}
+function stamp(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+
+function saveFile(text,name){
+  var blob=new Blob([text],{type:"text/vcard"});
+  var file;try{file=new File([blob],name,{type:"text/vcard"})}catch(e){}
+  if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
+    navigator.share({files:[file],title:name}).then(function(){toast("Saved "+name)}).catch(function(e){if(e&&e.name!=="AbortError")download(blob,name)});
+    return;
+  }
+  download(blob,name);
+}
+function download(blob,name){
+  var url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(url);a.remove()},4000);
+  toast("Downloaded "+name);
+}
+
+var tt;function toast(m){var t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(function(){t.hidden=true},2600)}
+function showError(m){var e=$("#error");e.textContent=m;e.hidden=false;$("#start").hidden=false;$("#results").hidden=true;$("#results").style.display="none";$("#bar").hidden=true}
+
+$("#file").addEventListener("change",function(e){
+  var f=e.target.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(){load(String(r.result),f.name,false)};
+  r.onerror=function(){showError("Could not read this file. Try saving the export again.")};
+  r.readAsText(f,"utf-8");
+  e.target.value="";
+});
+$("#sampleBtn").addEventListener("click",function(){load(SAMPLE,"",true)});
+$("#changeFile").addEventListener("click",function(){$("#file").click()});
+document.querySelectorAll(".chip").forEach(function(b){b.addEventListener("click",function(){filter=filter===b.dataset.f?"all":b.dataset.f;shown=150;render()})});
+$("#q").addEventListener("input",function(e){query=e.target.value.trim();shown=150;render()});
+$("#moreBtn").addEventListener("click",function(){shown+=150;render()});
+$("#toggleAll").addEventListener("click",function(){
+  var v=visible().filter(function(n){return n.status==="fix"||n.status==="review"});
+  var on=!v.every(function(n){return n.apply});
+  v.forEach(function(n){n.apply=on});render();
+});
+$("#list").addEventListener("input",function(e){
+  var t=e.target;if(!t.classList.contains("new"))return;
+  var n=nums[+t.dataset.id];n.edit=t.value;
+  var ok=valid(t.value);t.classList.toggle("invalid",!!t.value&&!ok);
+  if(n.status==="review"){n.apply=ok;var cb=document.getElementById("a"+n.id);if(cb)cb.checked=ok}
+  updateBar();
+});
+$("#list").addEventListener("change",function(e){
+  var t=e.target;if(t.type!=="checkbox")return;
+  nums[+t.dataset.id].apply=t.checked;syncToggleLabel();updateBar();
+});
+$("#saveChanged").addEventListener("click",function(){saveFile(buildVcf(true),"contacts-changed-"+stamp()+".vcf")});
+$("#saveAll").addEventListener("click",function(){saveFile(buildVcf(false),"contacts-all-fixed-"+stamp()+".vcf")});
+$("#copyNames").addEventListener("click",function(){
+  var s={},names=[];nums.forEach(function(n){if(isChange(n)&&!s[n.ci]){s[n.ci]=1;names.push(cards[n.ci].name)}});
+  if(!names.length){toast("No changed contacts yet");return}
+  var txt=names.join("\n");
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){toast("Copied "+names.length+" names")},function(){toast("Copy failed")})}
+  else toast("Copy not supported here");
+});
+})();
+</script>
+</body>
+</html>
